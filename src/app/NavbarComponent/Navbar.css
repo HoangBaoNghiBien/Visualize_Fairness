@@ -1,0 +1,18 @@
+.nav {
+  background: var(--navbar-background);
+  padding: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000; /* Ensure it stays on top */
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+  margin-left: 15px;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
