@@ -13,14 +13,18 @@ const locationIcon = new L.Icon({
     popupAnchor: [1, -34],
 });
 
-const Map = () => {
+const Map = ({ dataset }) => {
     const [geojson, setGeojson] = useState(null);
 
     useEffect(() => {
-        fetch('/Hospital_Locations.geojson')
-            .then(response => response.json())
-            .then(data => setGeojson(data));
-    }, []);
+        if (dataset === 'Hospital') {
+            fetch('/Hospital_Locations.geojson')
+                .then(response => response.json())
+                .then(data => setGeojson(data));
+        } else {
+            setGeojson(null);
+        }
+    }, [dataset]);
 
     return (
         <div className="map-container">

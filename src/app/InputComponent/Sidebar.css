@@ -50,6 +50,16 @@ input[type="radio"] {
   margin-left: 45px;
 }
 
+.upload-form {
+  margin-top: 20px;
+}
+
+.upload-form label {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
 .device-info {
   margin-top: 20px;
 }
