@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import './Sidebar.css';
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx'
 
 const Sidebar = ({ onDatasetChange }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +37,7 @@ const Sidebar = ({ onDatasetChange }) => {
                         <select value={dataset} onChange={handleDatasetChange}>
                             <option value="" disabled>Select Dataset</option>
                             <option value="Hospital">Hospital</option>
-                            <option value="CTA_BusStops">CTA Bus Stops</option>
+                            {/* <option value="CTA_BusStops">CTA Bus Stops</option> */}
                             <option value="CTA_RailStations">CTA Rail Stations</option>
                             <option value="Divvy_Bicycle_Stations">Divvy Bicycle Stations</option>
                             <option value="School">School</option>
