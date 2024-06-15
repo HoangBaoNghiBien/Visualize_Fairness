@@ -20,13 +20,40 @@ const Map = ({ dataset }) => {
     const [geojson, setGeojson] = useState(null);
     const [error, setError] = useState('');
 
+    // useEffect(() => {
+    //     if (dataset) {
+    //         fetchDataset(dataset).catch(err => {
+    //             setError(`Failed to load the dataset: ${err.message}`);
+    //         });
+    //     }
+    // }, [dataset]);
     useEffect(() => {
         if (dataset) {
-            fetchDataset(dataset).catch(err => {
+            const fileExtension = dataset.split('.').pop();
+            fetchDataset(dataset, fileExtension).catch(err => {
                 setError(`Failed to load the dataset: ${err.message}`);
             });
         }
     }, [dataset]);
+
+    const fetchDataset = async (dataset, fileExtension) => {
+        let response = await fetch(`/dataset/${dataset}`);
+        if (!response.ok) throw new Error('Network response was not ok.');
+
+        switch (fileExtension) {
+            case 'csv':
+                let text = await response.text();
+                setGeojson(convertCSVToGeoJSON(text));
+                break;
+            case 'xlsx':
+                let arrayBuffer = await response.arrayBuffer();
+                setGeojson(convertXLSXToGeoJSON(arrayBuffer));
+                break;
+            default:
+                let json = await response.json();
+                setGeojson(json);
+        }
+    };
 
     // useEffect(() => {
     //     if (dataset === 'Hospital') {
@@ -81,22 +108,22 @@ const Map = ({ dataset }) => {
     //         });
     // };
 
-    const fetchDataset = async (dataset) => {
-        let fileExtension = dataset === 'Divvy_Bicycle_Stations' ? '.csv' : dataset === 'School' ? '.xlsx' : '.geojson';
-        let response = await fetch(`/dataset/${dataset}${fileExtension}`);
-        if (!response.ok) throw new Error('Network response was not ok.');
+    // const fetchDataset = async (dataset) => {
+    //     let fileExtension = dataset === 'Divvy_Bicycle_Stations' ? '.csv' : dataset === 'School' ? '.xlsx' : '.geojson';
+    //     let response = await fetch(`/dataset/${dataset}${fileExtension}`);
+    //     if (!response.ok) throw new Error('Network response was not ok.');
 
-        if (fileExtension === '.csv') {
-            let text = await response.text();
-            setGeojson(convertCSVToGeoJSON(text));
-        } else if (fileExtension === '.xlsx') {
-            let arrayBuffer = await response.arrayBuffer();
-            setGeojson(convertXLSXToGeoJSON(arrayBuffer));
-        } else {
-            let json = await response.json();
-            setGeojson(json);
-        }
-    };
+    //     if (fileExtension === '.csv') {
+    //         let text = await response.text();
+    //         setGeojson(convertCSVToGeoJSON(text));
+    //     } else if (fileExtension === '.xlsx') {
+    //         let arrayBuffer = await response.arrayBuffer();
+    //         setGeojson(convertXLSXToGeoJSON(arrayBuffer));
+    //     } else {
+    //         let json = await response.json();
+    //         setGeojson(json);
+    //     }
+    // };
 
     {/* -- Convert CSV to GeoJSON --
         1. Parse CSV data using Papa.parse() method.
