@@ -9,12 +9,12 @@ const Sidebar = dynamic(() => import('./InputComponent/Sidebar'), { ssr: false }
 
 export default function Home() {
   const [dataset, setDataset] = useState('');
-  
+  const [fileLink, setFilelink] = useState('');
   return (
     <div className="main-container">
       <Navbar />
-      <Sidebar onDatasetChange={setDataset} />
-      <Map dataset={dataset} />
+      <Sidebar onDatasetChange={setDataset}/>
+      <Map dataset={dataset}/>
     </div>
   );
 }

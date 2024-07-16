@@ -10,8 +10,11 @@ const app = express();
 // Enable CORS for all routes
 app.use(cors());
 
+app.use('/files', express.static(path.join(__dirname, 'temporary_files')))
+
+
 // Configure storage
-const storage = multer.diskStorage({
+const storage_pblic = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './public/dataset')
     },
@@ -20,14 +23,15 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload_to_pblic = multer({ storage: storage_pblic });
+
 
 app.get("/", (req, res) => {
     res.send('<h1>Hello World!</h1>')
 })
 
 // Upload a file to the server
-app.post('/upload', upload.single('file'),(req, res) => {
+app.post('/upload', upload_to_pblic.single('file'),(req, res) => {
     if (req.file){
         res.status(200).end()
         console.log(req.file)
@@ -37,7 +41,6 @@ app.post('/upload', upload.single('file'),(req, res) => {
         error: "file not valid?"
     })
 });
-
 
 // Serve the uploaded files to the client
 app.get('/api/files', (req, res) => {
@@ -49,6 +52,18 @@ app.get('/api/files', (req, res) => {
             return res.status(500).send({ message: "Unable to scan files!" });
         }
         res.json(files);
+    });
+});
+
+app.delete('/temp/:filename(*)', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname,'../../../public/dataset', filename);
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error("Error deleting the file: ", err);
+            return res.status(404).json({ error: "File not found" });
+        }
+        res.status(200).send({ message: "File deleted successfully" });
     });
 });
 
