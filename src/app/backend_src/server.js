@@ -42,6 +42,21 @@ app.post('/upload', upload_to_pblic.single('file'),(req, res) => {
     })
 });
 
+// upload the modified file to the server
+app.post('/upload/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, '../../../public/dataset', filename
+    );
+    fs.writeFile(filePath, JSON.stringify(req.body), (err) => {
+        if (err) {
+            console.error("Error writing the file: ", err);
+            return res.status(500).send({ message: "Unable to write the file!" });
+        }
+        res.status(200).send({ message: "File written successfully" });
+    }
+    );
+});
+
 // Serve the uploaded files to the client
 app.get('/api/files', (req, res) => {
     const directoryPath = path.join(__dirname, '../../../public/dataset');
@@ -53,6 +68,21 @@ app.get('/api/files', (req, res) => {
         }
         res.json(files);
     });
+});
+
+
+app.get('/api/files/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, '../../../public/dataset', filename
+    );
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error("Error reading the file: ", err);
+            return res.status(404).json({ error: "File not found" });
+        }
+        res.json(JSON.parse(data));
+    }
+    );
 });
 
 app.delete('/temp/:filename(*)', (req, res) => {

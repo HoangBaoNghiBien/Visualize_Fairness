@@ -5,20 +5,154 @@ import './Sidebar.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx'
 import axios from 'axios'
+import DeviceForm from './DeviceForm';
 
-const Sidebar = ({ onDatasetChange, onGetLink }) => {
+const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
     const [isOpen, setIsOpen] = useState(false);    // Sidebar open/close state
     const [dataset, setDataset] = useState('');     // Selected dataset
     const [showUploadForm, setShowUploadForm] = useState(false);    // Show/hide upload form
     const [serviceAction, setServiceAction] = useState('');     // Selected service action
     const [numDevices, setNumDevices] = useState(1);        // Number of devices
     const [deviceDetails, setDeviceDetails] = useState([]);     // Details of each device
-    const [placeBy, setPlaceBy] = useState('coordinate');      // Place device by address or coordinate
 
     const [filePath, setFilePath] = useState(null)      // Path of the uploaded file
     const [fileName, setFileName] = useState(null)      // Name of the uploaded file
     const [datasetOptions, setDatasetOptions] = useState([]);   // List of available datasets
     const [toDelete, setToDelete] = useState(null);
+
+    const [longitude, setLongitude] = useState('');
+    const [latitude, setLatitude] = useState('');
+
+    const handleChange = (id, e) => {
+        const { name, value } = e.target;
+        
+        if (e.target.name === 'longitude') {
+            setLongitude(e.target.value);
+        }
+        if (e.target.name === 'latitude') {
+            setLatitude(e.target.value);
+        }
+        setDevices((prevDevices) =>
+            prevDevices.map((device) =>
+                device.id === id ? { ...device, [name]: value } : device
+            )
+        );
+        // setLongitude('');
+        // setLatitude('');
+    };
+
+    const handleTypeChange = (id, type) => {
+        setDevices((prevDevices) =>
+            prevDevices.map((device) =>
+                device.id === id ? { ...device, type } : device
+            )
+        );
+    };
+
+    const addDevice = () => {
+        setDevices((prevDevices) => [
+            ...prevDevices,
+            {
+                id: Date.now(),
+                type: 'address',
+                name: '',
+                address: '',
+                city: '',
+                zipcode: '',
+                longitude: '',
+                latitude: ''
+            }
+        ]);
+
+        setLatitude('');
+        setLongitude('');
+    };
+
+    const removeDevice = (id) => {
+        setDevices((prevDevices) => prevDevices.filter((device) => device.id !== id));
+    };
+    
+    const renderDeviceInputs = (device) => {
+        if (device.type === 'address') {
+            return (
+                <>
+                    <label>Name:
+                        <input
+                            type="text"
+                            name="name"
+                            value={device.name}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Name"
+                        />
+                    </label>
+                    <label>Address (*):
+                        <input
+                            type="text"
+                            name="address"
+                            value={device.address}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Address"
+                            required
+                        />
+                    </label>
+                    <label>City (*):
+                        <input
+                            type="text"
+                            name="city"
+                            value={device.city}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="City"
+                            required
+                        />
+                    </label>
+                    <label>Zipcode (*):
+                        <input
+                            type="text"
+                            name="zipcode"
+                            value={device.zipcode}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Zipcode"
+                            required
+                        />
+                    </label>
+                </>
+            );
+        } else {
+            return (
+                <>
+                    <label>Name:
+                        <input
+                            type="text"
+                            name="name"
+                            value={device.name}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Name"
+                        />
+                    </label>
+                    <label>Longitude (*):
+                        <input
+                            type="text"
+                            name="longitude"
+                            value={device.longitude}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Longitude"
+                            required
+                        />
+                    </label>
+                    <label>Latitude (*):
+                        <input
+                            type="text"
+                            name="latitude"
+                            value={device.latitude}
+                            onChange={(e) => handleChange(device.id, e)}
+                            placeholder="Latitude"
+                            required
+                        />
+                    </label>
+                </>
+            );
+        }
+    };
 
     // Function to toggle sidebar visibility
     const toggleSidebar = () => {
@@ -29,11 +163,6 @@ const Sidebar = ({ onDatasetChange, onGetLink }) => {
         setDeviceDetails(Array.from({ length: numDevices }, (_, index) => ({ id: index + 1 })));
     }, [numDevices]);
 
-    {/* Dataset change */ }
-    // Handle the change between available datasets and new uploads
-    // If user selects "New Upload", show the upload form
-    // If user selects an existing dataset, notify the parent Component
-    //      and hide the upload form
     const handleDatasetChange = (e) => {
         const selectedDataset = e.target.value;
         setDataset(selectedDataset);
@@ -69,16 +198,6 @@ const Sidebar = ({ onDatasetChange, onGetLink }) => {
         }
     }
 
-
-    {/* Handle number of devices change */ }
-    const handleNumDevicesChange = (event) => {
-        const num = Number(event.target.value);
-        setNumDevices(num >= 1 ? num : 1);
-    };
-
-    {/* Handle the form submission */ }
-    // Send the uploaded file to the server
-    //     and notify the parent Component of the change
     const handleSubmit = (event) => {
         const formData = new FormData()
         formData.append("file", filePath);
@@ -86,18 +205,6 @@ const Sidebar = ({ onDatasetChange, onGetLink }) => {
         const req = axios.post('http://localhost:3000/upload', formData)
         req.then(response => response.data)
     }
-
-    // // Function to re-fetch dataset list
-    // const fetchDatasets = () => {
-    //     fetch('http://localhost:3000/api/files')
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             setDatasetOptions(data.map(file => ({ label: file, value: file })));
-    //         })
-    //         .catch(error => console.error('Error fetching files:', error));
-    // };
-
-
 
     // Take the file in public/dataset and display it in the dropdown
     useEffect(() => {
@@ -115,46 +222,7 @@ const Sidebar = ({ onDatasetChange, onGetLink }) => {
             .catch(error => console.error('Error fetching files:', error));
     }, []);
 
-
-    {/* Handle place by change */ }
-    const handlePlaceByChange = (event) => {
-        setPlaceBy(event.target.value);
-    };
-
-    const renderDeviceInputs = (device) => {
-        if (placeBy === 'address') {
-            return (
-                <>
-                    <label>Name:
-                        <input type="text" placeholder="Name" />
-                    </label>
-                    <label>Address (*):
-                        <input type="text" placeholder="Address" required />
-                    </label>
-                    <label>City (*):
-                        <input type="text" placeholder="City" required />
-                    </label>
-                    <label>Zipcode (*):
-                        <input type="text" placeholder="Zipcode" required />
-                    </label>
-                </>
-            );
-        } else {
-            return (
-                <>
-                    <label>Name:
-                        <input type="text" placeholder="Name" />
-                    </label>
-                    <label>Longitude (*):
-                        <input type="text" placeholder="Longitude" required />
-                    </label>
-                    <label>Latitude (*):
-                        <input type="text" placeholder="Latitude" required />
-                    </label>
-                </>
-            );
-        }
-    };
+    const isFilled = longitude === '' || latitude === '';
 
     return (
         <div className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -199,32 +267,14 @@ const Sidebar = ({ onDatasetChange, onGetLink }) => {
                             <option value="Remove location">Remove location</option>
                         </select>
                     </label>
-
-                    {/* Device details */}
-                    {/* Choose the number of devices and provide details for each device. */}
-                    <div className="place-device-container">
-                        <label>Place device BY:</label>
-                        <div className="radio-container">
-                            <label>
-                                <input type="radio" name="placeBy" value="coordinate" onChange={handlePlaceByChange} checked={placeBy === 'coordinate'} /> Coordinate
-                            </label>
-                            <label>
-                                <input type="radio" name="placeBy" value="address" onChange={handlePlaceByChange} /> Address
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="number-of-devices">
-                        <label>Number of Devices:
-                            <input type="number" value={numDevices} onChange={handleNumDevicesChange} min="1" />
-                        </label>
-                    </div>
-                    {deviceDetails.map(device => (
-                        <div key={device.id} className="device-info">
-                            <h3>Device {device.id}:</h3>
-                            {renderDeviceInputs(device)}
-                        </div>
-                    ))}
+                    <DeviceForm
+                        devices={devices}
+                        handleTypeChange={handleTypeChange}
+                        renderDeviceInputs={renderDeviceInputs}
+                        removeDevice={removeDevice}
+                        addDevice={addDevice}
+                        isFilled={isFilled}
+                    />
 
                     {/* Buttons */}
                     <div className="buttons">
