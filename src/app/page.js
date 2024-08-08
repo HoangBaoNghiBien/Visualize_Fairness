@@ -19,12 +19,18 @@ export default function Home() {
     zipcode: '',
     longitude: '',
     latitude: ''
-}]);
-  // console.log(devices);
+  }]);
+
+  // Make sure the state change logic is correct
+  const handleDatasetChange = (newDataset) => {
+    setDataset(newDataset);
+    console.log("Dataset updated:", newDataset);
+  };
+
   return (
     <div className="main-container">
       <Navbar />
-      <Sidebar onDatasetChange={setDataset} devices={devices} setDevices={setDevices}/>
+      <Sidebar onDatasetChange={handleDatasetChange} devices={devices} setDevices={setDevices}/>
       <Map dataset={dataset} devices={devices}/>
     </div>
   );

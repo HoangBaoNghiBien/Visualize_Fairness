@@ -3,13 +3,13 @@ const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const bodyParser = require('body-parser')
 
 const app = express();
 
-
+// app.use(bodyParser.json())
 // Enable CORS for all routes
 app.use(cors());
-
 app.use('/files', express.static(path.join(__dirname, 'temporary_files')))
 
 
@@ -42,8 +42,9 @@ app.post('/upload', upload_to_pblic.single('file'),(req, res) => {
     })
 });
 
+
 // upload the modified file to the server
-app.post('/upload/:filename', (req, res) => {
+app.put('/upload/:filename', (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(__dirname, '../../../public/dataset', filename
     );

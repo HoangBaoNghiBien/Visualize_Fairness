@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import axios from 'axios'
 import './Map.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx'
@@ -26,8 +27,10 @@ const addLocationIcon = new L.Icon({
 
 const Map = ({ dataset, devices }) => {
 
+    
     const [geojson, setGeojson] = useState(null);
     const [error, setError] = useState('');
+
 
     useEffect(() => {
         if (dataset) {
@@ -35,25 +38,49 @@ const Map = ({ dataset, devices }) => {
             fetchDataset(dataset, fileExtension).catch(err => {
                 setError(`Failed to load the dataset: ${err.message}`);
             });
+        } else {
+            setGeojson(null);
         }
     }, [dataset]);
 
     const fetchDataset = async (dataset, fileExtension) => {
+        console.log('fetching dataset runs here')
         let response = await fetch(`/dataset/${dataset}`);
         if (!response.ok) throw new Error('Network response was not ok.');
+        let converted_file = null
 
+        let fileType = 'application/json';
+        let fileName = `${dataset.split('.')[0]}.geojson`
+        
         switch (fileExtension) {
             case 'csv':
                 let text = await response.text();
-                setGeojson(convertCSVToGeoJSON(text));
+                converted_file = convertCSVToGeoJSON(text)
                 break;
             case 'xlsx':
                 let arrayBuffer = await response.arrayBuffer();
-                setGeojson(convertXLSXToGeoJSON(arrayBuffer));
+                converted_file = convertXLSXToGeoJSON(arrayBuffer)
                 break;
             default:
-                let json = await response.json();
-                setGeojson(json);
+                converted_file = await response.json();
+        }
+        if (fileExtension !== 'geojson') {
+            const blob = new Blob([JSON.stringify(converted_file)], { type: fileType });
+            const formData = new FormData();
+            console.log(blob)
+            console.log(fileName)
+            formData.append('file', blob, fileName);
+            await uploadConvertedFile(dataset.split('.')[0] + ".geojson", formData)
+            const response = await axios.delete(`http://localhost:3000/temp/${dataset}`)
+        }
+        setGeojson(converted_file);
+    };
+
+    const uploadConvertedFile = async (filename, formData) => {
+        try {
+            const response = await axios.post('http://localhost:3000/upload', formData)
+        } catch (error) {
+            console.error('Error uploading converted file:', error);
         }
     };
 
@@ -118,8 +145,8 @@ const Map = ({ dataset, devices }) => {
             features: features
         };
     };
-    console.log("In Map.js")
-    console.log(devices)
+
+
     return (
         <div className="map-container">
             <MapContainer center={[41.8781, -87.6298]} zoom={13} style={{ height: '100vh', width: '100%' }}>
@@ -141,6 +168,7 @@ const Map = ({ dataset, devices }) => {
                         </Popup>
                     </Marker>
                 ))}
+
                 {devices && devices.map((device, index) => {
                     if (device.type === 'coordinates' && device.latitude && device.longitude) {
                         console.log("in map function")

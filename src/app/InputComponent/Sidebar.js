@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Component } from 'react';
+import React, { useState, useEffect, Component, useRef } from 'react';
 import './Sidebar.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx'
@@ -14,6 +14,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
     const [serviceAction, setServiceAction] = useState('');     // Selected service action
     const [numDevices, setNumDevices] = useState(1);        // Number of devices
     const [deviceDetails, setDeviceDetails] = useState([]);     // Details of each device
+    const fileInputRef = useRef(null);
 
     const [filePath, setFilePath] = useState(null)      // Path of the uploaded file
     const [fileName, setFileName] = useState(null)      // Name of the uploaded file
@@ -179,8 +180,9 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
         setServiceAction(e.target.value);
     };
 
-    {/* Handle file input change */ }
-    const handleInputChange = (event) => {
+    {/* Handle upload */ }
+    const handleInputChange = async (event) => {
+        console.log("changed")
         const file = event.target.files[0]
 
         if (file) {
@@ -189,21 +191,45 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
             console.log(file.name)
             const formData = new FormData()
             formData.append("file", file);
-            const req = axios.post('http://localhost:3000/upload', formData)
-            req.then(response => response.data)
-            onDatasetChange(file.name)
-            setToDelete(file.name) // if not subimt then we can call request to del
+            const req = await axios.post('http://localhost:3000/upload', formData)
+            // req.then(response => response.data)
+            let temp_file = `${file.name.split('.')[0]}.geojson`
+            onDatasetChange(file.name) // settings the uplooaded file
+            setToDelete(temp_file) // but we delete the converted file
+            // if not subimt then we can call request to del
             // http://localhost:3000/temp/:filename(*)
-            //
         }
     }
 
-    const handleSubmit = (event) => {
-        const formData = new FormData()
-        formData.append("file", filePath);
+    const handleSubmit = async (event) => {
+        // currently, pressing submit will upload the file to the server
+        // handle case where we want to cancel the upload
+        // get value by
+        const value = event.target.value
+        if (value === 'cancel' && toDelete) {
+            console.log("hi in cancel")
+            let temp_file = `${fileName.split('.')[0]}.geojson`
 
-        const req = axios.post('http://localhost:3000/upload', formData)
-        req.then(response => response.data)
+            const req = await axios.delete(`http://localhost:3000/temp/${temp_file}`)
+            console.log("starting to set states to null")
+            setToDelete(null)
+            setFileName(null)
+    
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            onDatasetChange(null)
+            return
+        }
+        const formData = new FormData()
+        if (filePath) {
+            formData.append("file", filePath);
+            const req = axios.post('http://localhost:3000/upload', formData)
+            req.then(response => response.data)
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
     }
 
     // Take the file in public/dataset and display it in the dropdown
@@ -253,7 +279,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
                         <div className="upload-form">
                             <label>
                                 Upload your dataset (*):
-                                <input onChange={handleInputChange} type="file" accept=".csv, .xls, .xlsx, .geojson" />
+                                <input ref={fileInputRef} onChange={handleInputChange} type="file" accept=".csv, .xls, .xlsx, .geojson" />
                             </label>
                         </div>
                     )}
@@ -278,7 +304,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
 
                     {/* Buttons */}
                     <div className="buttons">
-                        <button type="button" className="cancel-button">Cancel</button>
+                        <button type="button" className="cancel-button" onClick={handleSubmit} value="cancel">Cancel</button>
                         <button type="submit" className="submit-button">Submit</button>
                     </div>
                 </form>

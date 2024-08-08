@@ -1,0 +1,6 @@
+{
+    "people": "/Users/linhvu/Desktop/externals/kapi/IL_dataset_50thousand-2.csv",
+    "locations": "/Users/linhvu/Desktop/externals/kapi/Hospital.geojson",
+    "groupA": "P1_003N",
+    "groupB": "P1_004N"
+}
