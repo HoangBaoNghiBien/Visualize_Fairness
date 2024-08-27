@@ -18,6 +18,14 @@
   }
 }
 
+/* Style for Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(213, 213, 213) rgb(252, 252, 252); /* Customize with your colors */
+  scroll-behavior: smooth;
+}
+
+
 /* body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -44,8 +52,9 @@ body {
 html, body, #__next {
   height: 100%;
   width: 100%;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
+
 
 .nav-link {
   margin-right: 15px;

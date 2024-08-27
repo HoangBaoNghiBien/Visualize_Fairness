@@ -1,0 +1,119 @@
+.management-page {
+    /* padding: 20px; */
+    overflow-y: auto;
+    height: 100vh;
+    padding-top: 3.2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.template-section {
+    margin-bottom: 20px;
+}
+
+.template-description {
+    margin-bottom: 10px;
+}
+
+.template-buttons {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.template-buttons button {
+    cursor: pointer;
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.dataset-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataset-section th, .dataset-section td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.dataset-section th {
+    background-color: #f2f2f2;
+}
+
+/* .management-page .download-button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.management-page .download-button a {
+    color: white;
+    text-decoration: none;
+}
+
+.management-page .delete-button {
+    background-color: #dc3545; 
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.management-page .delete-button:hover {
+    background-color: #c82333; 
+} */
+
+.button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.download-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.download-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.icon {
+    padding-right: 5px;
+}
+
+.management-page .download-button, .management-page .delete-button {
+    width: 120px; /* Set a fixed width for both buttons */
+    margin-left: 30px;
+    margin-right: 30px; /* Space between the buttons */
+    padding: 12px 15px; /* Adjust padding to make the buttons taller or shorter */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.management-page .delete-button {
+    margin-right: 0; /* Remove right margin for the delete button to avoid extra space on the right */
+    margin-left: 0;
+}

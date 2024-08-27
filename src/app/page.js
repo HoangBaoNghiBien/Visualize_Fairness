@@ -10,6 +10,7 @@ const Sidebar = dynamic(() => import('./InputComponent/Sidebar'), { ssr: false }
 export default function Home() {
   const [dataset, setDataset] = useState('');
   const [fileLink, setFilelink] = useState('');
+
   const [devices, setDevices] = useState([{
     id: Date.now(),
     type: 'address',
@@ -21,6 +22,8 @@ export default function Home() {
     latitude: ''
   }]);
 
+  console.log(devices)
+
   // Make sure the state change logic is correct
   const handleDatasetChange = (newDataset) => {
     setDataset(newDataset);
@@ -29,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="main-container">
-      <Navbar />
+      {/* <Navbar /> */}
       <Sidebar onDatasetChange={handleDatasetChange} devices={devices} setDevices={setDevices}/>
       <Map dataset={dataset} devices={devices}/>
     </div>

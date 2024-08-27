@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
+const { exec } = require('child_process'); 
 const path = require('path');
 const bodyParser = require('body-parser')
 
@@ -10,7 +11,9 @@ const app = express();
 // app.use(bodyParser.json())
 // Enable CORS for all routes
 app.use(cors());
-app.use('/files', express.static(path.join(__dirname, 'temporary_files')))
+app.use('/files', express.static(path.join(__dirname, 'temporary_files')));
+app.use('/templates', express.static(path.join(__dirname, 'public/templates')));
+
 
 
 // Configure storage
@@ -23,7 +26,36 @@ const storage_pblic = multer.diskStorage({
     }
 });
 
+const storage_fairness = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './fairness')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
+    }
+});
+
+const upload_to_fairness = multer({ storage: storage_fairness });
 const upload_to_pblic = multer({ storage: storage_pblic });
+
+app.get('/run-python', (req, res) => {
+    // Call the Python script using exec
+    // print current working directory
+    console.log(__dirname);
+    exec(`python3 fairness/get_metrics.py -c fairness/config.json`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing script: ${error}`);
+        return res.status(500).send({ error: 'Error executing Python script' });
+      }
+      if (stderr) {
+        console.error(`Script error: ${stderr}`);
+        return res.status(500).send({ error: stderr });
+      }
+      // Send back the output from the Python script
+      res.send({ output: stdout });
+    });
+  });
+  
 
 
 app.get("/", (req, res) => {
@@ -32,6 +64,17 @@ app.get("/", (req, res) => {
 
 // Upload a file to the server
 app.post('/upload', upload_to_pblic.single('file'),(req, res) => {
+    if (req.file){
+        res.status(200).end()
+        console.log(req.file)
+        return
+    }
+    res.status(404).json({
+        error: "file not valid?"
+    })
+});
+
+app.post('/upload/fairness', upload_to_fairness.single('file'),(req, res) => {
     if (req.file){
         res.status(200).end()
         console.log(req.file)
@@ -61,6 +104,20 @@ app.put('/upload/:filename', (req, res) => {
 // Serve the uploaded files to the client
 app.get('/api/files', (req, res) => {
     const directoryPath = path.join(__dirname, '../../../public/dataset');
+    // console.log(directoryPath);
+    fs.readdir(directoryPath, function (err, files) {
+        if (err) {
+            console.error("Error reading the directory: ", err);
+            return res.status(500).send({ message: "Unable to scan files!" });
+        }
+        console.log(files);
+        res.json(files);
+    });
+});
+
+// Serve the uploaded files to the client
+app.get('/api/templates', (req, res) => {
+    const directoryPath = path.join(__dirname, '../../../public/templates');
     // console.log(directoryPath);
     fs.readdir(directoryPath, function (err, files) {
         if (err) {

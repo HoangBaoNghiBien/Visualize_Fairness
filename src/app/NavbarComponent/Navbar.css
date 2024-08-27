@@ -1,6 +1,9 @@
 .nav {
+  position: fixed;
+  width: 100%;
+  top: 0;
   background: var(--navbar-background);
-  padding: 1rem;
+  padding: 1rem 0rem;
   display: flex;
   justify-content: flex-end;
   z-index: 1000; /* Ensure it stays on top */

@@ -9,7 +9,33 @@ npm install
 yarn install
 ```
 
-#### 2. To run the project:
+#### 2. Install Python packages (if you haven't installed them yet):
+
+```bash
+pip install haversine
+# or
+pip3 install haversine
+```
+
+```bash
+pip install geopandas
+# or
+pip3 install geopandas
+```
+
+```bash
+pip install argparse
+# or
+pip3 install argparse
+```
+
+```bash
+pip install json
+# or
+pip3 install json
+```
+
+#### 3. To run the project:
 
 First, you have to run the server (backend) by running the following command:
 
