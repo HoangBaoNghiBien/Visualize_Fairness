@@ -114,7 +114,6 @@ if __name__ == "__main__":
     people[["FIPS","race"]], geometry=gpd.points_from_xy(people.lon, people.lat)
 ).set_crs('epsg:4326').to_crs('epsg:26916')
     
-    # locations = gpd.read_file(conf['locations']).set_crs('epsg:4326').to_crs('epsg:26916')
     locations = gpd.read_file(conf['locations']).to_crs('epsg:26916')
     
     print(get_metrics(people, locations, groupA, groupB))

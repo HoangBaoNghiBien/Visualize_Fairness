@@ -205,9 +205,10 @@ const Map = ({ dataset, devices }) => {
 
     useEffect(() => {
         let newGeojson = { ...geojson, devices: []};
-
+        let empty = true
         devices.forEach(async device => {
             if (device.latitude && device.longitude) {
+                empty = false
                 console.log("in map function")
                 console.log(device)
                 // get geojson to new variable
@@ -221,7 +222,13 @@ const Map = ({ dataset, devices }) => {
                 }
             }
         })
-
+        if (empty) {
+            newGeojson.devices = []
+            setGeojson(newGeojson)
+            // let fileName = `${dataset.split('.')[0]}.geojson`;
+            // const { formData, file_name } =  createFormDataFromFile(newGeojson, 'application/json', fileName, fileName);
+            // await uploadConvertedFile(file_name, formData)
+        }
     }, [devices]);
 
 
@@ -233,7 +240,7 @@ const Map = ({ dataset, devices }) => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
 
-                {geojson && geojson.features.map((feature, index) => {
+                {geojson && geojson.features && geojson.features.map((feature, index) => {
                     const icon = locationIcon
                     // Return the JSX for Marker
                     return (

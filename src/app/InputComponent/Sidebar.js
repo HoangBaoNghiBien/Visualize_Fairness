@@ -221,6 +221,25 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
             onDatasetChange(null)
             return
         }
+        else if (value === 'cancel') {
+            // clear out DeviceForm
+            setDevices([{
+                id: Date.now(),
+                type: 'address',
+                name: '',
+                address: '',
+                city: '',
+                zipcode: '',
+                longitude: '',
+                latitude: ''
+              }])
+            setLongitude('')
+            setLatitude('')
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            return
+        }
         const formData = new FormData()
         if (filePath) {
             formData.append("file", filePath);
