@@ -12,27 +12,9 @@ yarn install
 #### 2. Install Python packages (if you haven't installed them yet):
 
 ```bash
-pip install haversine
+pip install -r requirements.txt
 # or
-pip3 install haversine
-```
-
-```bash
-pip install geopandas
-# or
-pip3 install geopandas
-```
-
-```bash
-pip install argparse
-# or
-pip3 install argparse
-```
-
-```bash
-pip install json
-# or
-pip3 install json
+pip3 install -r requirements.txt
 ```
 
 #### 3. To run the project:

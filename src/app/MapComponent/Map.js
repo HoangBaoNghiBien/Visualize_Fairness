@@ -8,7 +8,7 @@ import axios from 'axios'
 import './Map.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx'
-import { Alert } from 'react-bootstrap'; 
+import { Alert } from 'react-bootstrap';
 
 class Device {
     constructor(longitude, latitude) {
@@ -48,7 +48,6 @@ const addLocationIcon = new L.Icon({
 
 const Map = ({ dataset, devices }) => {
 
-    
     const [geojson, setGeojson] = useState(null);
     const [error, setError] = useState('');
 
@@ -67,33 +66,34 @@ const Map = ({ dataset, devices }) => {
     function createFormDataFromFile(converted_file, fileType, fileName, dataset) {
         // Create a Blob from the converted file
         const blob = new Blob([JSON.stringify(converted_file)], { type: fileType });
-    
+
         // Log Blob and fileName for debugging
         console.log(blob);
         console.log(fileName);
-    
+
         // Create FormData and append the Blob
         const formData = new FormData();
         formData.append('file', blob, fileName);
-    
+
         // Create a file name with '.geojson' extension
         const file_name = dataset.split('.')[0] + ".geojson";
-    
+
         // Return the FormData and file name
         return { formData, file_name };
     }
-    
+
 
 
     const fetchDataset = async (dataset, fileExtension) => {
         console.log('fetching dataset runs here')
         let response = await fetch(`/dataset/${dataset}`);
+
         if (!response.ok) throw new Error('Network response was not ok.');
         let converted_file = null
 
         let fileType = 'application/json';
         let fileName = `${dataset.split('.')[0]}.geojson`
-        
+
         switch (fileExtension) {
             case 'csv':
                 let text = await response.text();
@@ -111,6 +111,7 @@ const Map = ({ dataset, devices }) => {
             await uploadConvertedFile(file_name, formData)
             const response = await axios.delete(`http://localhost:3000/temp/${dataset}`)
         }
+
         setGeojson(converted_file);
 
         var object =
@@ -120,17 +121,24 @@ const Map = ({ dataset, devices }) => {
             "groupA": "P1_003N",
             "groupB": "P1_004N"
         }
-        
-        
-        // write obect to /fairness/config.json
+
         const blob = new Blob([JSON.stringify(object)], { type: fileType });
         const formData = new FormData();
         console.log(blob)
         console.log(fileName)
-        formData.append('file', blob, 'config.json' );
+        formData.append('file', blob, 'config.json');
         await axios.post('http://localhost:3000/upload/fairness', formData)
-        const equity = await axios.get('http://localhost:3000/run-python')
-        console.log(equity.data)
+        
+        setTimeout(() => {
+            axios.get('http://localhost:3000/run-python')
+                .then(response => {
+                    console.log(response.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }, 2000)
+
     };
 
     const uploadConvertedFile = async (filename, formData) => {
@@ -204,7 +212,7 @@ const Map = ({ dataset, devices }) => {
     };
 
     useEffect(() => {
-        let newGeojson = { ...geojson, devices: []};
+        let newGeojson = { ...geojson, devices: [] };
         let empty = true
         devices.forEach(async device => {
             if (device.latitude && device.longitude) {
@@ -212,12 +220,12 @@ const Map = ({ dataset, devices }) => {
                 console.log("in map function")
                 console.log(device)
                 // get geojson to new variable
-                
+
                 newGeojson.devices.push(new Device(device.longitude, device.latitude).json())
                 setGeojson(newGeojson)
                 if (newGeojson.features.length > 0) {
                     let fileName = `${dataset.split('.')[0]}.geojson`;
-                    const { formData, file_name } =  createFormDataFromFile(newGeojson, 'application/json', fileName, fileName);
+                    const { formData, file_name } = createFormDataFromFile(newGeojson, 'application/json', fileName, fileName);
                     await uploadConvertedFile(file_name, formData)
                 }
             }
@@ -225,14 +233,13 @@ const Map = ({ dataset, devices }) => {
         if (empty) {
             newGeojson.devices = []
             setGeojson(newGeojson)
-            // let fileName = `${dataset.split('.')[0]}.geojson`;
-            // const { formData, file_name } =  createFormDataFromFile(newGeojson, 'application/json', fileName, fileName);
-            // await uploadConvertedFile(file_name, formData)
+
         }
     }, [devices]);
 
 
     return (
+        // <div></div>
         <div className="map-container">
             <MapContainer center={[41.8781, -87.6298]} zoom={13} style={{ height: '100vh', width: '100%' }}>
                 <TileLayer
@@ -277,25 +284,6 @@ const Map = ({ dataset, devices }) => {
                     );
                 }
                 )}
-
-                {/* {devices && devices.map((device, index) => {
-                    if (device.type === 'coordinates' && device.latitude && device.longitude) {
-                        console.log("in map function")
-                        console.log(device)
-                        return (
-                            <Marker
-                                key={device.id}
-                                position={[parseFloat(device.latitude), parseFloat(device.longitude)]}
-                                icon={addLocationIcon}
-                            >
-                                <Popup>
-                                    <b>{device.name || 'No name'}</b><br />
-                                    {device.address || 'No address'}
-                                </Popup>
-                            </Marker>
-                        );
-                    }
-                })} */}
 
             </MapContainer>
         </div>

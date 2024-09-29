@@ -26,7 +26,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
 
     const handleChange = (id, e) => {
         const { name, value } = e.target;
-        
+
         if (e.target.name === 'longitude') {
             setLongitude(e.target.value);
         }
@@ -72,7 +72,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
     const removeDevice = (id) => {
         setDevices((prevDevices) => prevDevices.filter((device) => device.id !== id));
     };
-    
+
     const renderDeviceInputs = (device) => {
         if (device.type === 'address') {
             return (
@@ -214,7 +214,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
             console.log("starting to set states to null")
             setToDelete(null)
             setFileName(null)
-    
+
             if (fileInputRef.current) {
                 fileInputRef.current.value = "";
             }
@@ -232,7 +232,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
                 zipcode: '',
                 longitude: '',
                 latitude: ''
-              }])
+            }])
             setLongitude('')
             setLatitude('')
             if (fileInputRef.current) {

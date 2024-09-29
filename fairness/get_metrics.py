@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import haversine
 import geopandas as gpd
-import pandas as pd
 import argparse
 import json
 

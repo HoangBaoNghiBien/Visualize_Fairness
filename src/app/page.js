@@ -33,8 +33,8 @@ export default function Home() {
   return (
     <div className="main-container">
       {/* <Navbar /> */}
-      <Sidebar onDatasetChange={handleDatasetChange} devices={devices} setDevices={setDevices}/>
-      <Map dataset={dataset} devices={devices}/>
+      <Sidebar onDatasetChange={handleDatasetChange} devices={devices} setDevices={setDevices} />
+      <Map dataset={dataset} devices={devices} />
     </div>
   );
 }
