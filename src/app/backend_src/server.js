@@ -8,6 +8,7 @@ const path = require('path');
 const app = express();
 
 app.use(cors());
+app.use(express.json()); 
 
 app.use('/files', express.static(path.join(__dirname, 'temporary_files')));
 app.use('/templates', express.static(path.join(__dirname, 'public/templates')));
@@ -75,10 +76,54 @@ function runPythonScript() {
     });
 }
 
+function runPythonCoverageScript() {
+    return new Promise((resolve, reject) => {
+        console.log("Running Coverage script");
+
+        const pythonProcess = spawn('python3', ['fairness/coverage_cal.py', '-c', 'fairness/config2.json'], {
+            timeout: 10000 // 10 seconds timeout
+        });
+
+        let output = '';
+        let errorOutput = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            errorOutput += data.toString();
+        });
+
+        pythonProcess.on('error', (err) => {
+            reject(`Failed to start Python script: ${err.message}`);
+        });
+
+        pythonProcess.on('close', (code) => {
+            if (code !== 0 || errorOutput) {
+                reject(errorOutput || `Python script exited with code ${code}`);
+            } else {
+                resolve(output);
+            }
+        });
+    });
+}
+
 
 app.get('/run-python', async (req, res) => {
     try {
         const result = await runPythonScript();
+        res.send({ output: result });
+    } catch (error) {
+        console.error("Error running Python script:", error);
+        res.status(500).send({ error: "Failed to run the Python script." });
+    }
+});
+
+
+app.get('/run-python-coverage', async (req, res) => {
+    try {
+        const result = await runPythonCoverageScript();
         res.send({ output: result });
     } catch (error) {
         console.error("Error running Python script:", error);
@@ -124,6 +169,21 @@ app.post('/upload/fairness', upload_to_fairness.single('file'), (req, res) => {
         });
     }
 });
+
+// app.post('/updateConfig2', (req, res) => {
+//     const { longitude, latitude } = req.body;
+//     const configPath = path.join(__dirname, 'fairness', 'config2.json');
+
+//     const configData = JSON.stringify({ longitude, latitude }, null, 2);
+
+//     fs.writeFile(configPath, configData, (err) => {
+//         if (err) {
+//             console.error("Error writing config2 file:", err);
+//             return res.status(500).json({ error: "Failed to update config2" });
+//         }
+//         res.json({ message: "Config2 updated successfully" });
+//     });
+// });
 
 
 

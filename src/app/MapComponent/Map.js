@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios'
@@ -9,6 +9,9 @@ import './Map.css';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx'
 import { Alert } from 'react-bootstrap';
+import { render } from "react-dom";
+import "leaflet/dist/leaflet.css";
+
 
 class Device {
     constructor(longitude, latitude) {
@@ -50,6 +53,12 @@ const Map = ({ dataset, devices }) => {
 
     const [geojson, setGeojson] = useState(null);
     const [error, setError] = useState('');
+    // const [circle, setCircle] = useState(null);
+    const [map, setMap] = useState(null);
+    // const [center, setCenter] = useState([41.8781, -87.6298]); // Use Chicago's coordinates as default
+    const [radius, setRadius] = useState(200);
+    const [circleCenter, setCircleCenter] = useState(null);
+
 
 
     useEffect(() => {
@@ -238,15 +247,96 @@ const Map = ({ dataset, devices }) => {
     }, [devices]);
 
 
+    // TAKE % OF EACH RACE AND DISPLAY ON CONSOLE LOG
+    const handleMarkerClick = async (e) => {
+        const { lat, lng } = e.latlng;
+        console.log(`Clicked marker at latitude: ${lat}, longitude: ${lng}`);
+        setCircleCenter({
+            lat: e.latlng.lat,
+            lng: e.latlng.lng,
+            radius: 200 // Or any other radius you wish to use
+        });
+
+        const object2 = {
+            "people": "fairness/IL_dataset_50thousand-2.csv",
+            longitude: lng.toString(),
+            latitude: lat.toString(),
+            "radius_miles": "3"
+        };
+        
+
+        const blob = new Blob([JSON.stringify(object2)], { type: 'application/json'});
+        const formData2 = new FormData();
+        // console.log(blob)
+        // console.log(fileName)
+        formData2.append('file', blob, 'config2.json');
+        await axios.post('http://localhost:3000/upload/fairness', formData2)
+
+        setTimeout(() => {
+            axios.get('http://localhost:3000/run-python-coverage')
+                .then(response => {
+                    console.log(response.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }, 2000)
+    };
+
+    // const handleMapClick = (e) => {
+    //     // const { lat, lng } = e.latlng;
+    //     // setCircleCenter([lat, lng]);
+    //     // console.log(`Clicked map to draw circle at latitude: ${lat}, longitude: ${lng}`);
+    //     console.log(`Clicked on map at latitude: ${e.latlng.lat}, longitude: ${e.latlng.lng}`);
+    //     setCircleCenter({
+    //         lat: e.latlng.lat,
+    //         lng: e.latlng.lng,
+    //         radius: 200 // Or any other radius you wish to use
+    //     });
+    // };
+
+    // {
+    //     circle && (
+    //         <Circle
+    //             center={[circle.lat, circle.lng]}
+    //             radius={circle.radius}
+    //             fillColor="blue"
+    //             color="red"
+    //             weight={1}
+    //         />
+    //     )
+    // }
+
+    // const handleClick = (e) => {
+    //     setCenter([e.latlng.lat, e.latlng.lng]);
+    //     setRadius(200); // You can adjust radius based on some condition or input
+    // };
+
+
+
     return (
         // <div></div>
         <div className="map-container">
-            <MapContainer center={[41.8781, -87.6298]} zoom={13} style={{ height: '100vh', width: '100%' }}>
+            <MapContainer 
+                center={[41.8781, -87.6298]} 
+                zoom={13} 
+                style={{ height: '100vh', width: '100%' }}
+                // eventHandlers={{
+                //     click: (e) => {
+                //         const { lat, lng } = e.latlng;
+                //         setCircleCenter([lat, lng]); // Assuming setCircleCenter updates the state for circle's center
+                //         console.log(`Clicked on map at latitude: ${lat}, longitude: ${lng}`);
+                //     }
+                // }}
+                // onClick={handleMapClick}
+            >
+
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-
+                {/* <Circle center={center} fillColor="blue" radius={radius} /> */}
+                {circleCenter && <Circle center={circleCenter} radius={radius} fillColor="blue" color="red" />}
                 {geojson && geojson.features && geojson.features.map((feature, index) => {
                     const icon = locationIcon
                     // Return the JSX for Marker
@@ -255,12 +345,16 @@ const Map = ({ dataset, devices }) => {
                             key={index}
                             position={[feature.geometry.coordinates[1], feature.geometry.coordinates[0]]}
                             icon={icon}  // Use the conditional icon
+                            eventHandlers={{
+                                click: handleMarkerClick,
+                            }}
                         >
-                            <Popup>
+
+                            {/* <Popup> */}
                                 {/* You can customize the popup content here */}
                                 {/* <b>{feature.properties.name || 'No name'}</b><br />
                                 {feature.properties.address || 'No address'} */}
-                            </Popup>
+                            {/* </Popup> */}
                         </Marker>
                     );
                 }
@@ -274,6 +368,9 @@ const Map = ({ dataset, devices }) => {
                             key={index}
                             position={[feature.geometry.coordinates[1], feature.geometry.coordinates[0]]}
                             icon={icon}  // Use the conditional icon
+                            eventHandlers={{
+                                click: handleMarkerClick,
+                            }}
                         >
                             <Popup>
                                 {/* You can customize the popup content here */}

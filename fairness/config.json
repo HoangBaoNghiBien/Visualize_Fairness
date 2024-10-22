@@ -1,1 +1,1 @@
-{"people":"fairness/IL_dataset_50thousand-2.csv","locations":"http://localhost:3001/dataset/test_dataset.geojson","groupA":"P1_003N","groupB":"P1_004N"}
+{"people":"fairness/IL_dataset_50thousand-2.csv","locations":"http://localhost:3001/dataset/Hospital.geojson","groupA":"P1_003N","groupB":"P1_004N"}
