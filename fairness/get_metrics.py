@@ -91,7 +91,8 @@ def get_metrics(people, locations, groupA, groupB):
     res = {}
     distparity = dist_dict[groupA]/dist_dict[groupB]
     res['distparity'] = distparity
-    return res
+    # return res
+    return distparity
     
 
 def parse_args(f):

@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx'
 import axios from 'axios'
 import DeviceForm from './DeviceForm';
 
-const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
+const Sidebar = ({ onDatasetChange, devices, setDevices, uploadGeojson }) => {
     const [isOpen, setIsOpen] = useState(false);    // Sidebar open/close state
     const [dataset, setDataset] = useState('');     // Selected dataset
     const [showUploadForm, setShowUploadForm] = useState(false);    // Show/hide upload form
@@ -42,12 +42,78 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
         // setLatitude('');
     };
 
-    const handleTypeChange = (id, type) => {
-        setDevices((prevDevices) =>
-            prevDevices.map((device) =>
-                device.id === id ? { ...device, type } : device
-            )
-        );
+    const handleTypeChange = async (id, type) => {
+        // Check if dataset is not empty
+        if (dataset === '') {
+            alert("Please select a dataset first");
+            return;
+        }
+    
+        try {
+            // Fetch the GeoJSON file
+            const url = `http://localhost:3000/api/files/${dataset}`;
+            const response = await axios.get(url);
+    
+            // Extract the devices array from the GeoJSON data
+            const geojsonData = response.data;
+            const devicesData = geojsonData.devices || []; // Fallback to empty array if devices key is missing
+    
+            // Map each device in the devices array to your device object structure
+            const newDevices = devicesData.map((device, index) => ({
+                id: Date.now() + index,  // Generate a unique ID for each device
+                type: 'coordinates',     // Set type as 'coordinates'
+                name: device.properties?.name || '',
+                latitude: device.geometry.coordinates[1],
+                longitude: device.geometry.coordinates[0],
+                address: '',
+                city: '',
+                zipcode: ''
+            }));
+    
+            // Determine if devicesData is empty and set devices state accordingly
+            // 41.87313312224097, -87.6591567315593
+            if (devicesData.length === 0) {
+                // If devicesData is empty, initialize with a single empty device
+                setDevices([
+                    {
+                        id: Date.now(),
+                        type: 'coordinates',  // Default to 'address' or 'coordinates' based on your preference
+                        name: '',
+                        address: '',
+                        city: '',
+                        zipcode: '',
+                        longitude: '',
+                        latitude: ''
+                    }
+                ]);
+            } else {
+                // If devicesData has items, add an empty form to the end
+                setDevices([
+                    ...newDevices,
+                    {
+                        id: Date.now() + devicesData.length,
+                        type: 'coordinates',  // Default to 'address' or 'coordinates'
+                        name: '',
+                        address: '',
+                        city: '',
+                        zipcode: '',
+                        longitude: '',
+                        latitude: ''
+                    }
+                ]);
+            }
+    
+            // Handle type change for the specific device
+            setDevices((prevDevices) =>
+                prevDevices.map((device) =>
+                    device.id === id ? { ...device, type } : device
+                )
+            );
+    
+        } catch (error) {
+            console.error("Error fetching GeoJSON file:", error);
+            alert("Failed to load devices from the selected dataset.");
+        }
     };
 
     const addDevice = () => {
@@ -55,7 +121,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
             ...prevDevices,
             {
                 id: Date.now(),
-                type: 'address',
+                type: 'coordinates',
                 name: '',
                 address: '',
                 city: '',
@@ -64,9 +130,9 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
                 latitude: ''
             }
         ]);
-
         setLatitude('');
         setLongitude('');
+        uploadGeojson();
     };
 
     const removeDevice = (id) => {
@@ -225,7 +291,7 @@ const Sidebar = ({ onDatasetChange, devices, setDevices }) => {
             // clear out DeviceForm
             setDevices([{
                 id: Date.now(),
-                type: 'address',
+                type: 'coordinates',
                 name: '',
                 address: '',
                 city: '',

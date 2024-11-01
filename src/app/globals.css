@@ -7,7 +7,8 @@
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
   --navbar-background: #007bff;
-  --sidebar-background: #f8f9fa;
+  /* --sidebar-background: #f8f9fa; */
+  --sidebar-background: rgba(255, 255, 255, 0.9);
 }
 
 @media (prefers-color-scheme: dark) {

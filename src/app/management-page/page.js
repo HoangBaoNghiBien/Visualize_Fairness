@@ -19,6 +19,8 @@ const ManagementPage = () => {
             .then(response => {
                 console.log('Datasets loaded:', response.data);  // Debug: Log datasets
                 setDatasets(response.data);
+                // const filteredDatasets = response.data.filter(dataset => !dataset.startsWith('.'));
+                // setDatasets(filteredDatasets);
             })
             .catch(err => console.error('Failed to load datasets:', err));
 
@@ -28,11 +30,21 @@ const ManagementPage = () => {
     }, []);
 
     const handleDelete = (filename) => {
-        // Request server to delete a specific file
-        axios.delete(`/temp/${filename}`)
-            .then(() => setDatasets(datasets.filter(dataset => dataset !== filename)))
-            .catch(error => console.error('Delete failed:', error));
+        console.log("Attempting to delete:", filename); // Debug log
+        const confirmed = window.confirm(`Are you sure you want to delete ${filename}?`);
+        if (confirmed) {
+            axios.delete(`http://localhost:3000/api/files/${filename}`)
+                .then(() => {
+                    setDatasets(datasets.filter(dataset => dataset !== filename));
+                    alert('File deleted successfully.');
+                })
+                .catch(error => {
+                    console.error('Delete failed:', error);
+                    alert('Failed to delete the file.');
+                });
+        }
     };
+
 
     return (
         <div className="management-page">
@@ -53,7 +65,7 @@ const ManagementPage = () => {
                     {/* <button onClick={() => window.location.href = '/templates/template.geojson'}>Download GeoJSON</button> */}
                     <button style={{ cursor: 'pointer' }} onClick={() => {
                         const a = document.createElement("a");
-                        a.href = '/templates/template.geojson';
+                        a.href = '/templates/GeoJson_template.geojson';
                         a.download = 'template.geojson';
                         document.body.appendChild(a);
                         a.click();
@@ -61,14 +73,14 @@ const ManagementPage = () => {
                     }}>
                         GeoJSON Template
                     </button>
-                    <button onClick={() => window.location.href = '/templates/template.xlsx'}>XLSX Template</button>
-                    <button onClick={() => window.location.href = '/templates/template.csv'}>CSV Template</button>
+                    <button onClick={() => window.location.href = '/templates/XLSX_template.xlsx'}>XLSX Template</button>
+                    <button onClick={() => window.location.href = '/templates/CSV_template.csv'}>CSV Template</button>
                 </div>
             </div>
             <div className="dataset-section">
                 <h2>Manage Datasets:</h2>
                 <div className="table-responsive">
-                {/* {datasets.map(dataset => (
+                    {/* {datasets.map(dataset => (
                     <div key={dataset}>
                         {dataset}
                         <a href={`/dataset/${dataset}`} download>Download</a>
@@ -91,16 +103,21 @@ const ManagementPage = () => {
                                         <button onClick={() => handleDelete(dataset)}>Delete</button>
                                     </td> */}
                                     <td>
-                                        {/* <button className="download-button">
-                                            <a href={`/dataset/${dataset}`} download>Download</a>
-                                        </button>
-                                        <button className="delete-button" onClick={() => handleDelete(dataset)}>
-                                            Delete
-                                        </button> */}
-                                        <button className="button download-button action-button">
+                                        {/* Update Download button to link directly to the file URL */}
+                                        <a
+                                            href={`/dataset/${dataset}`}
+                                            download
+                                            className="button download-button action-button no-underline"
+                                        >
                                             <i className="fa fa-download icon"></i> Download
-                                        </button>
-                                        <button className="button delete-button action-button">
+                                        </a>
+                                        {/* <button className="button download-button action-button">
+                                            <i className="fa fa-download icon"></i> Download
+                                        </button> */}
+                                        <button
+                                            className="button delete-button action-button"
+                                            onClick={() => handleDelete(dataset)}
+                                        >
                                             <i className="fa fa-trash icon"></i> Delete
                                         </button>
 

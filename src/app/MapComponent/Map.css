@@ -14,3 +14,100 @@
   border-radius: 4px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
+
+/* .details-panel {
+  position: fixed;
+  left: 20px; 
+  bottom: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  width: 300px; 
+  z-index: 1000; 
+} */
+
+.details-panel {
+  position: fixed;
+  left: 15px;
+  bottom: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding-left: 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  width: 750px; /* Increased width */
+  display: flex; /* Using flexbox to layout children */
+  justify-content: space-between; /* Distributes space between and around content items */
+  z-index: 1000;
+  max-width: 90%;
+}
+
+/* .details-panel .text-details, .details-panel .chart-details {
+  flex: 1;
+  margin: 5px;
+} */
+
+.details-panel .text-details {
+  flex: 0 0 30%; /* Occupies 30% of the width */
+  margin: 5px;
+  padding-top: 30px;
+}
+
+.details-panel .chart-details {
+  flex: 0 0 70%; /* Occupies 70% of the width */
+  margin: 5px;
+  padding-top: 30px;
+}
+
+.text-details, .chart-details {
+  padding-top: 15px;
+}
+
+.text-details, .chart-details {
+  padding-top: 10px;
+}
+
+.pie-chart-container {
+  width: 100%; /* Full width of its container */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 350px;
+}
+
+.pie-chart-tooltip, .pie-chart-legend {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  padding: 5px;
+  font-size: 1px;
+}
+
+@media (max-width: 600px) {
+  .details-panel {
+    flex-direction: column; /* Stack vertically on small screens */
+  }
+
+  .details-panel .text-details, .details-panel .chart-details {
+    flex: none; /* Avoid flex growing */
+    width: 100%; /* Full width */
+  }
+
+  .pie-chart-container {
+    height: 300px; /* Adjust height for smaller screens */
+  }
+}
+
+.details-panel .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #000000;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

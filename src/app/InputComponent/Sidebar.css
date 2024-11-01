@@ -24,7 +24,7 @@
 .toggle-button {
   position: absolute;
   left: -52px;
-  top: 50%;
+  top: 20%;
   transform: translateY(-50%);
   background-color: var(--sidebar-background);
   color: black;

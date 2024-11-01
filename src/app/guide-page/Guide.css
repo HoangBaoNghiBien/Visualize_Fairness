@@ -1,0 +1,33 @@
+.guide-full-width {
+    padding: 40px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: #333;
+}
+
+.guide-full-width h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.guide-full-width h2 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.guide-full-width p, .guide-full-width li {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.guide-full-width ol, .guide-full-width ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.guide-full-width strong {
+    color: #333;
+}

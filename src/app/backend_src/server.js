@@ -170,22 +170,6 @@ app.post('/upload/fairness', upload_to_fairness.single('file'), (req, res) => {
     }
 });
 
-// app.post('/updateConfig2', (req, res) => {
-//     const { longitude, latitude } = req.body;
-//     const configPath = path.join(__dirname, 'fairness', 'config2.json');
-
-//     const configData = JSON.stringify({ longitude, latitude }, null, 2);
-
-//     fs.writeFile(configPath, configData, (err) => {
-//         if (err) {
-//             console.error("Error writing config2 file:", err);
-//             return res.status(500).json({ error: "Failed to update config2" });
-//         }
-//         res.json({ message: "Config2 updated successfully" });
-//     });
-// });
-
-
 
 // upload the modified file to the server
 app.put('/upload/:filename', (req, res) => {
@@ -211,8 +195,14 @@ app.get('/api/files', (req, res) => {
             console.error("Error reading the directory: ", err);
             return res.status(500).send({ message: "Unable to scan files!" });
         }
-        console.log(files);
-        res.json(files);
+        // Filter out hidden files (those that start with a dot)
+        const visibleFiles = files.filter(file => !file.startsWith('.'));
+
+        console.log(visibleFiles);  // Debug: Log only the filtered files
+        res.json(visibleFiles);
+
+        // console.log(files);
+        // res.json(files);
     });
 });
 
@@ -242,6 +232,20 @@ app.get('/api/files/:filename', (req, res) => {
         res.json(JSON.parse(data));
     }
     );
+});
+
+// Delete a file from the server (for management page use))
+app.delete('/api/files/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, '../../../public/dataset', filename);
+
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error("Error deleting the file: ", err);
+            return res.status(404).json({ error: "File not found" });
+        }
+        res.status(200).send({ message: "File deleted successfully" });
+    });
 });
 
 app.delete('/temp/:filename(*)', (req, res) => {

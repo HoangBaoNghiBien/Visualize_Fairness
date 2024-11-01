@@ -85,11 +85,14 @@ def calculate_coverage_circle(location, people, radius_miles):
 
     # Prepare results
     results = {
-        "total_population": total_population,
+        # "total_population": total_population,
         "demographic_percentages": race_percentages.to_dict()
+        # race_percentages.to_dict()
     }
 
     return results
+    # Only return race_percentages
+    
 
 
 def coverage_stats_cal(people_path, longitude, latitude, radius_miles):
@@ -112,6 +115,10 @@ def coverage_stats_cal(people_path, longitude, latitude, radius_miles):
 
     # Calculate coverage
     coverage_stats = calculate_coverage_circle(target_location, people_gdf, radius_miles)
+    
+    # Save to JSON file
+    with open('./fairness/coverage_stats.json', 'w') as json_file:
+        json.dump(coverage_stats, json_file, indent=4)
 
     return coverage_stats
 
@@ -138,44 +145,13 @@ if __name__ == "__main__":
     radius_miles = float(conf['radius_miles'])
     
     results = coverage_stats_cal(people, longitude, latitude, radius_miles)
+    # convert to json
+    print(json.dumps(results))
     
-    print(f"Coverage Circle Statistics (Radius: {radius_miles} miles)")
-    print(f"Total Population: {results['total_population']}")
-    print("Demographic Percentages:")
-    for race, percentage in results['demographic_percentages'].items():
-        print(f" {race}: {percentage}%")
+    # print(f"Coverage Circle Statistics (Radius: {radius_miles} miles)")
+    # print(f"Total Population: {results['total_population']}")
+    # print("Demographic Percentages:")
+    # for race, percentage in results['demographic_percentages'].items():
+    #     print(json.dumps(f" {race}: {percentage}%"))
     
-    
-
-
-# # Updated main function
-# def main(people_path, longitude, latitude, radius_miles):
-#     # Load people data
-#     people = pd.read_csv(people_path)
-    
-#     # Apply merge_dataset function
-#     people = merge_dataset(people, list_grouped=['P1_009N', 'P1_008N'])
-    
-#     people_gdf = gpd.GeoDataFrame(
-#         people[["FIPS", "race"]],
-#         geometry=gpd.points_from_xy(people.lon, people.lat)
-#     ).set_crs('epsg:4326').to_crs('epsg:26916')
-
-#     # Create a GeoDataFrame for the target location
-#     target_location = gpd.GeoDataFrame(
-#         {'geometry': [Point(longitude, latitude)]},
-#         crs='epsg:4326'
-#     ).to_crs('epsg:26916')
-
-#     # Calculate coverage
-#     coverage_stats, coverage_area, people_in_coverage = calculate_coverage_circle(target_location, people_gdf, radius_miles)
-
-#     # Print results
-#     print(f"Coverage Circle Statistics (Radius: {radius_miles} miles)")
-#     print(f"Total Population: {coverage_stats['total_population']}")
-#     print("Demographic Percentages:")
-#     for race, percentage in coverage_stats['demographic_percentages'].items():
-#         print(f" {race}: {percentage}%")
-
-#     # Plot the coverage circle
-#     plot_coverage_circle(target_location, people_gdf, coverage_area, people_in_coverage)
+    # print("Results have been saved to 'coverage_stats.json'")
